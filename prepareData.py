@@ -104,13 +104,14 @@ def gen_csv():
 	input_file = os.path.join(FILE_PATH, input_file_name)
 	writer = csv.writer(open(input_file, "w"), delimiter=',')
 	for doc in dst_collection.find():
-		writer.writerow([doc['document_id'], doc['keywords'], doc['text'].encode('utf-8')])
+		writer.writerow([doc['document_id'], doc['keywords'], doc['text_processed'].encode('utf-8')])
 
 
 
 def runner():
 	metadatas = getAllMetadatas()
 	concactTextAndInsert(metadatas)
+	os.system("./filter_nonSci_words.py")
 	gen_csv()
 	print "Done."
 	# print clean_mainbody("<html>asdfsa</html>")
