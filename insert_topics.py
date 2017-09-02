@@ -8,20 +8,19 @@
 from pymongo import MongoClient
 
 client = MongoClient('localhost', 27019)
-db = client.nasa_publication
+DB = client.nasa_publication
 topic_fn = "data/document-topic-distributions.csv"
 labels = "data/label-index.txt"
-topics=[]
 
 def readTopics():
-    global topics
+    topics = []
     with open(labels, "r") as labelFile:
         lines = labelFile.readlines()
         for l in lines:
             topics.append(l.strip())
+    return topics
 
-def importTopics():
-    collection = db.LLDA_topics
+def importTopics(topics, collection=DB.LLDA_topics):
     collection.drop()
     with open(topic_fn, "r") as f1: # , open(attribute_matrix,"w") as f2:
         lines = f1.readlines()
@@ -55,6 +54,11 @@ def importTopics():
                     'topics': topic_list
                 }}, True)
 
+def runner():
+    print "Insert topics..."
+    topics = readTopics()
+    importTopics(topics=topics)
+    print "Done..."
 
-readTopics()
-importTopics()
+if __name__ == "__main__":
+    runner()

@@ -12,7 +12,7 @@
     import edu.stanford.nlp.tmt.model.lda._;
     import edu.stanford.nlp.tmt.model.llda._;
 
-    val source = CSVFile("/home/athena/DustData/preprocessing/llda_result/data/TopicTermtop5.csv") ~> IDColumn(1);
+    val source = CSVFile("/home/yuhao/Dust/dataProcessing/PreProcessing/llda_result/data/TopicTermtop5.csv") ~> IDColumn(1);
 
     import scala.io.Source
     val listOfLines = Source.fromFile("stopwords.txt").getLines.toList

@@ -7,7 +7,8 @@ from bs4 import BeautifulSoup
 import re, csv, os
 
 client = MongoClient('hawking.sv.cmu.edu', 27019)
-dst_collection = client.nasa_publication.LLDA_input
+DB = client.nasa_publication
+dst_collection = DB.LLDA_input
 
 pre_re_arr = [re.compile(r' *?\[.*?<a.*?>.*?<\/a>.*?\]'),
 	re.compile(r' *?<em>.*?et al\..*?<\/em>')]
@@ -18,15 +19,15 @@ post_re_arr = [re.compile(r'[()]'),
 
 '''
 	Format of k1\k2: word1 word2; word3 word4 word5; word6 word7（There keyword in total）
-	Regenerate: 
+	Regenerate:
 		all words to lower case
 		Use '/' as interval of word in one key. Use ' ' as interval of different keys
 
 '''
 def gen_keywords(k1, k2):
 	k1 = k1.lower()
-	k2 = k2.lower()	
-	
+	k2 = k2.lower()
+
 	k_set = set([k.strip() for k in k1.split(";")] + [k.strip() for k in k2.split(";")])
 	return " ".join([k.replace(" +", " ").replace(" ", "/") for k in k_set]).strip()
 
@@ -64,14 +65,14 @@ def insertDataIntoMongo(document_id, keywords, text):
 def getAllMetadatas():
 	metadatas = {}
 	metadata_list = list(client.paper_content.paper_metadata.find(
-					{"document_id":{"$exists" : True}}, 
+					{"document_id":{"$exists" : True}},
 					{"document_id" : 1, 'Title': 1, "Abstract": 1, "Authour Keyword": 1, "Keywords2" : 1}))
 	for m in metadata_list:
 		metadatas[m['document_id']] = m
 	return metadatas
 
 '''
-	 Title, Abstract, mainbody (w/o acknoledgement), remove “… et al.”/citations/”()” 
+	 Title, Abstract, mainbody (w/o acknoledgement), remove “… et al.”/citations/”()”
 '''
 def concactTextAndInsert(metadatas):
 	dst_collection.drop()
@@ -82,43 +83,44 @@ def concactTextAndInsert(metadatas):
 		mainbody_backup = doc['mainbody_backup']
 		mainbody = clean_mainbody(mainbody_backup)
 		# print mainbody
-		metadata = metadatas[document_id]
-		# print metadata
-		if metadata['Title'] is not None:
-			metadata['Title'] += "."
-		if metadata['Abstract'] is not None:
-			for r in post_re_arr:
-				metadata['Abstract'] = r.sub(" ", metadata['Abstract'])
-
-		keywords = gen_keywords(metadata['Authour Keyword'], metadata['Keywords2'])
+		keywords = get_keywords_by_id(metadatas, document_id)
 		if keywords is None or len(keywords) == 0:
 			continue
 		text = " ".join([i for i in [metadata['Title'], metadata['Abstract'], mainbody] if i is not None])
 		insertDataIntoMongo(document_id, keywords, text)
 
-def gen_csv():
+'''
+	document_id: str
+'''
+def get_keywords_by_id(metadatas, document_id):
+	metadata = metadatas[document_id]
+	# print metadata
+	if metadata['Title'] is not None:
+		metadata['Title'] += "."
+	if metadata['Abstract'] is not None:
+		for r in post_re_arr:
+			metadata['Abstract'] = r.sub(" ", metadata['Abstract'])
+
+	return gen_keywords(metadata['Authour Keyword'], metadata['Keywords2'])
+
+def gen_csv(src_coll=dst_collection):
 	APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-	
+
 	FILE_PATH = os.path.join(APP_ROOT, 'data')
 	input_file_name = "TopicTermtop5.csv"
 	input_file = os.path.join(FILE_PATH, input_file_name)
 	writer = csv.writer(open(input_file, "w"), delimiter=',')
 	for doc in dst_collection.find():
-		writer.writerow([doc['document_id'], doc['keywords'], doc['text_processed'].encode('utf-8')])
+		writer.writerow([doc['document_id'], doc['keywords'], doc['text_sweet_words'].encode('utf-8')])
 
 
 
 def runner():
 	metadatas = getAllMetadatas()
 	concactTextAndInsert(metadatas)
-	os.system("./filter_nonSci_words.py")
+	os.system('./filter_non_sweet_words.py')
 	gen_csv()
 	print "Done."
-	# print clean_mainbody("<html>asdfsa</html>")
-
 
 if __name__ == "__main__":
 	runner()
-
-
-

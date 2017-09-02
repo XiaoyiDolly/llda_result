@@ -4,6 +4,7 @@ from pymongo import MongoClient
 
 import re, sys
 
+client = MongoClient('hawking.sv.cmu.edu', 27019)
 
 
 
@@ -13,7 +14,7 @@ def helper():
 		''' % (sys.argv[0]))
 
 
-def summary(input_summay_file):
+def summary(input_summay_file, dst_coll):
 	topic_map = {}
 
 	with open(input_summay_file, 'r') as f:
@@ -40,7 +41,6 @@ def summary(input_summay_file):
 
 	# print topic_map
 
-	client = MongoClient('hawking.sv.cmu.edu', 27019)
 	for doc in client.nasa_publication.LLDA_topics.find():
 		paper_id = doc['paper_id']
 		for topic in doc['topics']:
@@ -52,22 +52,22 @@ def summary(input_summay_file):
 
 	print topic_map
 
-	client.nasa_publication.topic_overview.drop()
+	dst_coll.drop()
 	topic_id = 0
 	for name in topic_map:
 		# print topic_map[name]
 		topic = topic_map[name]
 		topic['topic_id'] = topic_id
 		topic_id += 1
-		client.nasa_publication.topic_overview.insert_one(topic)
+		dst_coll.insert_one(topic)
 
 
-def runner():
+def runner(dst_coll=client.nasa_publication.topic_overview):
 	if len(sys.argv) != 2:
 		helper()
 		exit(1)
 
-	summary(sys.argv[1])
+	summary(sys.argv[1], dst_coll)
 
 if __name__ == "__main__":
 	runner()
