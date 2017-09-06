@@ -83,7 +83,9 @@ def concactTextAndInsert(metadatas):
 		mainbody_backup = doc['mainbody_backup']
 		mainbody = clean_mainbody(mainbody_backup)
 		# print mainbody
+		metadata = metadatas[document_id]
 		keywords = get_keywords_by_id(metadatas, document_id)
+
 		if keywords is None or len(keywords) == 0:
 			continue
 		text = " ".join([i for i in [metadata['Title'], metadata['Abstract'], mainbody] if i is not None])
@@ -110,7 +112,7 @@ def gen_csv(src_coll=dst_collection):
 	input_file_name = "TopicTermtop5.csv"
 	input_file = os.path.join(FILE_PATH, input_file_name)
 	writer = csv.writer(open(input_file, "w"), delimiter=',')
-	for doc in dst_collection.find():
+	for doc in src_coll.find():
 		writer.writerow([doc['document_id'], doc['keywords'], doc['text_sweet_words'].encode('utf-8')])
 
 

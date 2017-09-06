@@ -14,7 +14,7 @@ def helper():
 		''' % (sys.argv[0]))
 
 
-def summary(input_summay_file, dst_coll):
+def summary(input_summay_file, src_coll, dst_coll):
 	topic_map = {}
 
 	with open(input_summay_file, 'r') as f:
@@ -41,7 +41,7 @@ def summary(input_summay_file, dst_coll):
 
 	# print topic_map
 
-	for doc in client.nasa_publication.LLDA_topics.find():
+	for doc in src_coll.find():
 		paper_id = doc['paper_id']
 		for topic in doc['topics']:
 			topic_name = topic['topic']
@@ -62,12 +62,12 @@ def summary(input_summay_file, dst_coll):
 		dst_coll.insert_one(topic)
 
 
-def runner(dst_coll=client.nasa_publication.topic_overview):
+def runner(src_coll=client.nasa_publication.LLDA_topics, dst_coll=client.nasa_publication.topic_overview):
 	if len(sys.argv) != 2:
 		helper()
 		exit(1)
-
-	summary(sys.argv[1], dst_coll)
+	
+	summary(sys.argv[1], src_coll, dst_coll)
 
 if __name__ == "__main__":
 	runner()
