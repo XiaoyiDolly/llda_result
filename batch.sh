@@ -1,4 +1,7 @@
 #!/bin/bash
-
-./prepareData.py && ./run.py && ./insert_topics.py && ./summary_LLDA_topics.py data/summary.txt && sudo ./gen_LLDA_topic_trend_csv.py /home/yankai/dustKnowledgeGraph/dustKnowledgeGraph/DustSocialNetwork-Frontend/public/data/topics.csv /home/yankai/dustKnowledgeGraph/dustKnowledgeGraph/DustSocialNetwork-Frontend/public/data/topicTrend.csv /home/yankai/dustKnowledgeGraph/dustKnowledgeGraph/DustSocialNetwork-Frontend/public/data/topicTrend_acc.csv && echo "Everthing Done!"
-
+if [ $# -ne 2 ]; then
+	echo $0 "id_lower_bound(inclusive) id_upper_bound(exclusive)"
+else
+	rm -f data/TopicTermtop5.csv.term-counts.cache.*.gz
+	./prepareData.py $1 $2 && ./run.py TopicTermtop5.csv && ./insert_topics.py && ./summary_LLDA_topics.py data/summary.txt 
+fi
