@@ -3,9 +3,9 @@
 
 import subprocess
 import shutil
-import os
+import os, time, sys
 
-def llda():
+def llda(input_file_name="TopicTermtop5.csv"):
     APP_ROOT = os.path.dirname(os.path.abspath(__file__))
     APP_BATCH = os.path.join(APP_ROOT, 'batch')
     FILE_PATH = os.path.join(APP_ROOT, 'data')
@@ -14,7 +14,6 @@ def llda():
     SUMMARY_PATH = os.path.join(OUT_PATH, '01000/summary.txt')
     LABEL_INDEX_PATH = os.path.join(OUT_PATH, '01000/label-index.txt')
     DIS_PATH = os.path.join(OUT_PATH, 'document-topic-distributions.csv')
-    input_file_name = "TopicTermtop5.csv"
     
     file_p = os.path.join(FILE_PATH, input_file_name)
 
@@ -102,9 +101,18 @@ def write_script(input, output, file):
     with open(file, 'w') as fout:
         fout.writelines(script_c)
 
+def helper():
+    print sys.argv[0] + " input_file_name"
+    sys.exit(1)
 
-
+def run():
+    start_time = time.time()
+    llda(input_file_name=sys.argv[1])
+    end_time = time.time()
+    print("*********LLDA Run Duration:" + str(end_time - start_time))
 
 if __name__ == "__main__":
-    llda()
+    if len(sys.argv) != 2:
+      helper()
+    run()
 

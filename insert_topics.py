@@ -45,7 +45,7 @@ def importTopics(topics, collection=DB.LLDA_topics):
                 i+=1
             if len(topic_list) ==0: continue
             topic_json["topics"] = topic_list
-            print(topic_json)
+            # print(topic_json)
 
             collection.update_one({
                 'paper_id': id

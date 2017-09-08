@@ -30,16 +30,12 @@ def summary(input_summay_file, src_coll, dst_coll):
 					# print topic_keywords
 				else: # first hierarchical topic 
 					if topic_name is not None:
-						print topic_name
 						topic_map[topic_name] = {'topic': topic_name, 'keywords': list(topic_keywords), 'publication_counts': 0, 'publication_ids':[]}
 					topic_name = line.split("\t")[0].replace('/', ' ')
 					topic_keywords = []
 	if topic_name is not None:
-		print topic_name
+		# print topic_name
 		topic_map[topic_name] = {'topic': topic_name, 'keywords': list(topic_keywords), 'publication_counts': 0, 'publication_ids':[]}
-
-
-	# print topic_map
 
 	for doc in src_coll.find():
 		paper_id = doc['paper_id']
@@ -50,8 +46,7 @@ def summary(input_summay_file, src_coll, dst_coll):
 			topic_map[topic_name]['publication_counts'] += 1
 			topic_map[topic_name]['publication_ids'].append(paper_id)
 
-	print topic_map
-
+	# print topic_map
 	dst_coll.drop()
 	topic_id = 0
 	for name in topic_map:
@@ -63,7 +58,7 @@ def summary(input_summay_file, src_coll, dst_coll):
 
 
 def runner(src_coll=client.nasa_publication.LLDA_topics, dst_coll=client.nasa_publication.topic_overview):
-	if len(sys.argv) != 2:
+	if len(sys.argv) < 2:
 		helper()
 		exit(1)
 	
