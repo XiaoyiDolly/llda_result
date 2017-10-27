@@ -21,7 +21,7 @@ def readTopics():
     return topics
 
 def importTopics(topics, collection=DB.LLDA_topics):
-    collection.drop()
+    # collection.drop()
     with open(topic_fn, "r") as f1: # , open(attribute_matrix,"w") as f2:
         lines = f1.readlines()
         for l in lines:
